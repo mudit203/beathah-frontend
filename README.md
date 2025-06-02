@@ -4,20 +4,61 @@ This section outlines all the corrections and improvements made to the project d
 
 ---
 
-## ✅ Configuration Corrections
+## ✅ Form Submission Fix - Login & Signup Pages
+ - **Problem Identified:-**
 
-- **To ensure compatibility with React 18, I have added an override in `package.json` to force `react-focus-lock` (a sub-dependency) to use React version `^18.2.0`**.
+   **The login and signup forms in `src/app/login/page.tsx` and `src/app/signup/page.tsx` were missing the critical `onSubmi`t handler, preventing form submission and users from logging in or registering accounts.**
 
-```
-"overrides": {
-  "react-focus-lock": {
-    "react": "^18.2.0"
-  }
-}
-```
+ - **Root Cause Analysis:-**
+
+   **The forms were defined but lacked the `onSubmit` attribute that connects the form submission to the authentication logic:**
+
+
+  **BEFORE:-** **INCORRECT**
+   
+   ```
+  <form> {/* Missing onSubmit handler */}
+  <LabelArea label="Email" />
+  <InputArea
+    required={true}
+    register={register}
+    defaultValue="admin@gmail.com"
+    label="Email"
+    name="email"
+    type="email"
+    placeholder="john@doe.com"
+  />
+  <Button type="submit">Login</Button>
+  </form>
+  ```
+   **AFTER:-**  **CORRECT**
+     ```
+  <form onSubmit={onSubmit}>  //FIXED
+  <LabelArea label="Email" />
+  <InputArea
+    required={true}
+    register={register}
+    defaultValue="admin@gmail.com"
+    label="Email"
+    name="email"
+    type="email"
+    placeholder="john@doe.com"
+  />
+  <Button type="submit">Login</Button>
+  </form>
+  ```
+  
+  ### RESULT
+ - ✅ Form submission works correctly
+ - ✅ Validation errors display properly
+ - ✅ Successful login redirects to /dashboard
+ - ✅ Error handling shows appropriate messages
+ - ✅ Loading states work correctly
+
 ---
 
-## Correction in registerAdmin controller
+---
+## 🔧 Edit Profile Page - Client-Side Rendering Fix
 
 -**The registerAdmin function in the `controller/adminController.js` was not returing the joiningDate in correct format,converted it into LocaleString to return the correct format.**
 ```
