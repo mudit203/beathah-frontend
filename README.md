@@ -177,7 +177,7 @@ const EditProfile: React.FC = () =>
 };
 
  ```
- - **Problem flow:-**
+  **Problem flow:-**
 
  - **Initial render → useFilter(dashboardRecentOrder?.orders || []) called**
  - **New array created → dashboardRecentOrder?.orders || [] creates new [] reference**
@@ -187,7 +187,7 @@ const EditProfile: React.FC = () =>
  - **Infinite loop → Dashboard never stabilizes**
   
   **AFTER:-**  **CORRECT**
-     ```
+    ```
   const Dashboard: React.FC = () => {
   const [dashboardRecentOrder, setDashboardRecentOrder] = useState<any>(null);
   
