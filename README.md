@@ -149,24 +149,67 @@ const EditProfile: React.FC = () =>
 - ✅ No TypeScript errors
 - ✅ All HTTP methods properly typed
 - ✅ IntelliSense working correctly
-- ✅ Build successful
+
 
 ---
 
 ---
- ## Fixed peer dependencies:-
+ ## 🔧 Dashboard Rendering Performance Fix - useMemo Optimization
+- **Problem Identified:-**
+
+   **The `src/app/dashboard` page was experiencing critical rendering issues and was not loading properly. The component was stuck in an infinite re-render loop causing poor performance and preventing the dashboard from displaying data.**
+
+- **Root Cause Analysis:-**
+
+   **The issue was caused by unnecessary re-renders in the `useFilter` hook due to object reference instability. Every time the Dashboard component re-rendered, a new array reference was being created and passed to useFilter, triggering its dependency array and causing an infinite loop.**
+
+ **BEFORE:-** **INCORRECT**
  ```
-npm install --legacy-peer-deps
+ const Dashboard: React.FC = () => {
+  const [dashboardRecentOrder, setDashboardRecentOrder] = useState<any>(null);
+  
+  // PROBLEM: Creates new array reference on every render
+  const { dataTable, serviceData } = useFilter(dashboardRecentOrder?.orders || []);
+  
+  return (
+    // Dashboard JSX...
+  );
+};
 
  ```
- **Alternative solutions used:-**
- ```
-npm install --force
-npm audit fix --force
- ```
+ - **Problem flow:-**
+
+ - **Initial render → useFilter(dashboardRecentOrder?.orders || []) called**
+ - **New array created → dashboardRecentOrder?.orders || [] creates new [] reference**
+ - **useFilter triggers → Dependency array detects change, recalculates**
+ - **Component re-renders → Due to state changes in useFilter**
+ - **Loop repeats → New array reference created again**
+ - **Infinite loop → Dashboard never stabilizes**
+  
+  **AFTER:-**  **CORRECT**
+     ```
+  const Dashboard: React.FC = () => {
+  const [dashboardRecentOrder, setDashboardRecentOrder] = useState<any>(null);
+  
+  // FIXED: Memoize the orders array to prevent unnecessary re-renders
+  const memoizedOrders = useMemo(() => 
+    dashboardRecentOrder?.orders || [], 
+    [dashboardRecentOrder]
+  );
+  
+  // Now useFilter receives stable reference
+  const { dataTable, serviceData } = useFilter(memoizedOrders);
+  
+  return (
+    // Dashboard JSX...
+  );
+};
+    ```
 
 ---
 
+
+---
 ## 🔍 API route path Fixes
   
 
