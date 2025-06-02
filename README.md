@@ -51,11 +51,11 @@ This section outlines all the corrections and improvements made to the project d
    ```
   
   ### RESULT
- - ✅ Form submission works correctly
- - ✅ Validation errors display properly
- - ✅ Successful login redirects to /dashboard
- - ✅ Error handling shows appropriate messages
- - ✅ Loading states work correctly
+ -  Form submission works correctly
+ -  Validation errors display properly
+ -  Successful login redirects to /dashboard
+ -  Error handling shows appropriate messages
+ -  Loading states work correctly
 
 ---
 
@@ -95,7 +95,7 @@ export default EditProfile;
 ```
  **AFTER:-**  **CORRECT**
  ```
- 'use client'; // ✅ FIXED: Added client-side directive
+ 'use client'; //  FIXED: Added client-side directive
 
 import React, { useContext, useState } from 'react';
 import { AdminContext } from '@/context/AdminContext';
@@ -146,9 +146,9 @@ const EditProfile: React.FC = () =>
 
   ```
 - **AFTER FIX:-**
-- ✅ No TypeScript errors
-- ✅ All HTTP methods properly typed
-- ✅ IntelliSense working correctly
+-  No TypeScript errors
+-  All HTTP methods properly typed
+-  IntelliSense working correctly
 
 
 ---
@@ -218,7 +218,7 @@ const storage =
 const persistConfig: any = {
   key: "root",
   version: 1,
-  storage,                            // ✅ Environment-safe storage
+  storage,                            
 };
 
 const rootReducer = combineReducers({
