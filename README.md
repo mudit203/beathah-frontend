@@ -62,26 +62,98 @@ This section outlines all the corrections and improvements made to the project d
 ---
 ## 🔧 Edit Profile Page - Client-Side Rendering Fix
 
--**The registerAdmin function in the `controller/adminController.js` was not returing the joiningDate in correct format,converted it into LocaleString to return the correct format.**
+- **Problem Identified:-**
+
+   **The Edit Profile page was experiencing rendering issues due to improper server-side/client-side component configuration. The page was attempting to use React Context (useContext) without being designated as a client-side component.**
+
+- **Root Cause Analysis:-**
+
+   **The Edit Profile component was using useContext for accessing user authentication state, but lacked the 'use client' directive required for client-side rendering in Next.js 13+ App Router.**
+
+ **BEFORE:-** **INCORRECT**
 ```
-res.send({
-        token,
-        _id: staff._id,
-        name: staff.name,
-        email: staff.email,
-        role: staff.role,
-       ** joiningDate: new Date().toLocaleString(),**
-        
-      });
+//src/app/edit-profile/page.tsx
+
+
+import React, { useContext, useState } from 'react';
+import { AdminContext } from '@/context/AdminContext';
+
+const EditProfile: React.FC = () => {
+  // ERROR: useContext not available in server components
+  const { state, dispatch } = useContext(AdminContext);
+  
+  // Component logic...
+  return (
+    <div>
+      {/* Edit profile form */}
+    </div>
+  );
+};
+
+export default EditProfile;
 
 ```
+ **AFTER:-**  **CORRECT**
+ ```
+ 'use client'; // ✅ FIXED: Added client-side directive
 
-## 🧩 Configuration and Dependency Fixes
+import React, { useContext, useState } from 'react';
+import { AdminContext } from '@/context/AdminContext';
 
-**Problem:** Missing peer dependencies causing package conflicts and installation warnings.
+const EditProfile: React.FC = () => 
+  // NOW WORKING: useContext available in client components
+  const { state, dispatch } = useContext(AdminContext);
+ ```
+---
 
-**Solution:** Resolved peer dependency issues using npm install commands
+---
+## 🔧 TypeScript HTTP Service Method Signature Fix
 
+- **Problem Identified:-**
+
+   **The `src/services/httpService.ts` file contained TypeScript errors due to incorrect method signatures for Axios HTTP methods. The error "Expected 1-2 arguments, but got 3" occurred because certain Axios methods were being called with more arguments than they accept.**
+
+- **Root Cause Analysis:-**
+
+   **the issue was in the `requests` object where `get`, `put`, and `delete` methods were incorrectly structured to accept three arguments, when `Axios` methods only accept 2 arguements**
+
+  **BEFORE:-** **INCORRECT**
+  ```
+  const requests = {
+  get: (url: string, body?: any, config?: AxiosRequestConfig): Promise<any> =>
+    instance.get(url, body, config).then(responseBody),  // 3 arguments - WRONG!
+
+   put: (url: string, body?: any, config?: AxiosRequestConfig): Promise<any> =>
+    instance.put(url, body, config).then(responseBody), //  3 arguments - WRONG
+   
+
+   ...
+  }
+
+  ```
+  **AFTER:-**  **CORRECT**
+  ```
+   const requests = {
+  get: (url: string, body?: any, config?: AxiosRequestConfig): Promise<any> =>
+    instance.get(url, config).then(responseBody),  // 2 arguments - CORRECT
+
+   put: (url: string, body?: any, config?: AxiosRequestConfig): Promise<any> =>
+    instance.put(url, config).then(responseBody), //  2 arguments - CORRECT
+   
+
+   ...
+  }
+
+  ```
+- **AFTER FIX:-**
+- ✅ No TypeScript errors
+- ✅ All HTTP methods properly typed
+- ✅ IntelliSense working correctly
+- ✅ Build successful
+
+---
+
+---
  ## Fixed peer dependencies:-
  ```
 npm install --legacy-peer-deps
