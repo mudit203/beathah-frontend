@@ -28,6 +28,8 @@ import { AdminProvider } from "@/context/AdminContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import ThemeSuspense from "@/components/theme/ThemeSuspense";
 import reduxStore from "@/reduxStore/store";
+import { ToastContainer } from "react-toastify"; // ✅ Add this
+import "react-toastify/dist/ReactToastify.css";
 
 // If you want to add Header globally, import it here
 import Header from "@/components/header/Header";

@@ -152,7 +152,127 @@ const EditProfile: React.FC = () =>
 
 
 ---
+---
+ ## 🔧 Dashboard Rendering Performance Fix - useMemo Optimization
+ - **Problem Identified:-**
 
+   **The application was showing critical errors in the terminal related to Redux-Persist storage configuration:**
+
+   ❌ redux-persist failed to create sync storage. falling back to noop storage.
+
+ - **Root Cause Analysis:-**
+
+   **These errors occurred because `redux-persist` in `src/reduxStore/store.ts` was attempting to access browser storage `(localStorage)` during server-side rendering `(SSR)` in `Next.js`, where browser APIs are not available.**
+
+  **BEFORE:-** **INCORRECT**
+```
+import storage from "redux-persist/lib/storage"; //  Direct localStorage usage
+
+const persistConfig = {
+    key: "root",
+    version: 1,
+    storage: storage, // ❌ PROBLEM: localStorage not available on server
+};
+```
+**AFTER:-**  **CORRECT**
+```
+// Assignment_frontend/src/reduxStore/store.ts
+'use client';
+
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import {
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+
+import dynamicDataReducer from "./slice/dynamicDataSlice";
+import settingReducer from "./slice/settingSlice";
+
+// FIXED: Create noop storage for server-side rendering
+const createNoopStorage = () => {
+  return {
+    getItem(_key: string) {
+      return Promise.resolve(null);
+    },
+    setItem(_key: string, value: any) {
+      return Promise.resolve(value);
+    },
+    removeItem(_key: string) {
+      return Promise.resolve();
+    },
+  };
+};
+
+//  FIXED: Conditional storage based on environment
+const storage =
+  typeof window !== "undefined"
+    ? createWebStorage("local")        // Browser: Use localStorage
+    : createNoopStorage();             // Server: Use noop storage
+
+const persistConfig: any = {
+  key: "root",
+  version: 1,
+  storage,                            // ✅ Environment-safe storage
+};
+
+const rootReducer = combineReducers({
+  setting: settingReducer,
+  data: dynamicDataReducer,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const reduxStore = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware: any) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
+});
+
+export default reduxStore;
+```
+**Key Fixes:**
+- Added environment-aware storage detection
+- Implemented createNoopStorage() for server-side rendering
+- Used conditional storage based on typeof window !== "undefined"
+- Fixed middleware serialization check configuration
+
+**Reason Behind Correction:-**
+
+*Server-Side Storage Access Issue:*
+- **Problem:** redux-persist was trying to access localStorage during SSR
+- **Root Cause:** Browser APIs (localStorage, window) don't exist on Node.js server
+- **Impact:** Terminal errors and fallback to noop storage
+
+*Environment Detection Solution:*
+- **Fix:** Check typeof `window !== "undefined"` before using browser storage
+- **Reason:** Ensures code works in both server and client environments
+- **Benefit:** Prevents runtime errors during SSR
+
+*Noop Storage Implementation*
+- **Purpose:** Provide storage interface that works on server
+- **Function:** Returns promises like real storage but performs no operations
+- **Result:** Clean server-side rendering without storage errors
+
+### Final Results:
+-  No more "noop storage" terminal errors
+-  Clean server-side rendering
+-  Proper state persistence in browser
+-  Production-ready Redux configuration
+
+
+
+
+---
 ---
  ## 🔧 Dashboard Rendering Performance Fix - useMemo Optimization
 - **Problem Identified:-**
@@ -206,6 +326,7 @@ const EditProfile: React.FC = () =>
 };
 
  ```
+
 
 
 
