@@ -31,8 +31,10 @@ This section outlines all the corrections and improvements made to the project d
   <Button type="submit">Login</Button>
   </form>
   ```
+
    **AFTER:-**  **CORRECT**
-    ```
+   ```
+
   <form onSubmit={onSubmit}>  //FIXED
   <LabelArea label="Email" />
   <InputArea
